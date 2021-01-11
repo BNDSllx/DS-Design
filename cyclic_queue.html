@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>循环队列</title>
+    <link rel="stylesheet" type="text/css" href="font.css" />
+</head>
+
+
+<body>
+<!--大标题-->
+<div class = "title">循环队列（Cyclic Queue）</div>
+<input type='text' id='all' style="border:0px solid white; width:20px" />
+
+<!--初始化-->
+<div class = func>
+    <input placeholder="输入循环队列长度" type="text" id="num">
+    <input type="button" value="初始化" onclick="initccq()">
+</div>
+<div id="test_div"></div>
+
+<!--尾部插入-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="insert4">
+    <input type="button" value="添加结点（Push）" onclick="push_key()">
+</div>
+<div id="test_div"></div>
+
+<!--输入数组生成循环队列-->
+<div class = func>
+    <input placeholder="输入数组" type="text" id="pusharr">
+    <input type="button" value="输入数组生成循环队列" onclick="insert_arr()">
+</div>
+<div id="test_div"></div>
+
+
+<!--头部删除-->
+<div class = func>
+    <input type="button" value="删除结点（Pop）" onclick="pop_key()">
+</div>
+<div id="test_div"></div>
+
+
+<!--查找指定位置结点-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="search1">
+    <input type="button" value="查找指定位置的结点" onclick="get_pos()">
+</div>
+<div id="test_div"></div>
+
+<!--改变数值-->
+<div class = func>
+    <input placeholder="输入要更改的数值" type="text" id="change1">
+    <input placeholder="输入下一个结点数值" type="text" id="change2">
+    <input placeholder="输入要更改的数值" type="text" id="change3">
+    <input type="button" value="修改完成" onclick="Change()">
+</div>
+<div id="test_div"></div>
+
+
+<br> </br>
+
+
+<div>
+    <svg id="svg" width="1000" height="1000"></svg>
+</div>
+
+
+<script>
+    //创建结点类
+    class Node {
+        //创建构造函数
+        constructor(data) {
+            this.data = data;
+            this.next = null;
+        }
+    }
+
+    //创建循环队列类
+    class Cyclicqueue {
+        //创建构造函数
+        constructor(n) {
+            this.length = 0;    //队列目前长度
+            this.front = null; //头指针
+            this.rear = null;  //尾指针
+            this.maxlen = n;   //最长长度
+            this.posfront = 0; //头结点的位置
+            this.posrear = 0; //尾结点的位置
+        }
+
+
+        //循环队列添加新节点
+        append(data) {
+            var node = new Node(data);
+            if (this.length == this.maxlen - 1) {
+                console.log("Cyclic Queue is full!");
+                alert("The Cyclic Queue is full! Please delete first!");
+                return false;
+            }
+            if (this.rear == null) {
+                this.front = node;
+                this.rear = node;
+                this.posfront = 0;
+                this.posrear = 1;
+            } else {
+                this.rear.next = node;
+                this.rear = this.rear.next;
+                this.posrear = (this.posrear + 1) % this.maxlen;
+            }
+            this.length++;
+            return true;
+        }
+
+
+        //删除结点
+        remove() {
+            if (this.length == 0) {
+                console.log("Delete Error!");
+                alert("The Cyclic Queue is empty! Please add first!");
+                return false;
+            }
+            var tmp = this.front;
+            this.front = this.front.next;
+            this.posfront = (this.posfront + 1) % this.maxlen;
+            tmp.data = null;
+            tmp.next = null;
+            if (this.front == null) {
+                this.rear = null;
+                this.posrear = this.posfront;
+            }
+            this.length--;
+        }
+
+
+        //打印循环队列
+        print() {
+            var tmp = this.front;
+            var index = 0;
+            var arr = [];
+            while (tmp) {
+                arr += tmp.data + ", ";
+                tmp = tmp.next;
+                if (tmp == this.rear && index != 0) {
+                    break;
+                }
+                index++;
+                console.log(arr);
+            }
+        }
+
+            //获取头指针的结点
+            getfront()
+            {
+                if (this.front == null) {
+                    return false;
+                }
+                return this.front.data;
+            }
+
+            //获取尾指针的结点
+            getrear()
+            {
+                if (this.rear == null) {
+                    return false;
+                }
+                return this.rear.data;
+            }
+
+            //查找指定位置的结点
+            getData(pos)
+            {
+                if (pos >= this.length) {
+                    return false;
+                }
+                var index = 0;
+                var tmp = this.front;
+                while (index++ < pos) {
+                    tmp = tmp.next;
+                }
+                return tmp.data;
+            }
+
+
+        //将循环队列存为数组
+        toArr() {
+            var arr = [];
+            var p = this.front;
+            while (p) {
+                arr.push(p.data);
+                p = p.next;
+            }
+            return arr;
+        }
+
+        //改变数值
+        change(a, b, c) {
+            var tmp = this.front;
+            var cnt = 0;
+            while(tmp) {
+                if(tmp.data == a && tmp.next == null && b == 0) {
+                    tmp.data = c;
+                    return;
+                } else if(tmp.data == a && tmp.next.data == b) {
+                    tmp.data = c;
+                    return;
+                }
+                if(!tmp.next) {
+                    alert("The data input is unavailable!");
+                    return;
+                }
+                cnt++;
+                if(cnt == this.maxlen) {
+                    alert("The data input is unavailable!");
+                    return;
+                }
+                tmp = tmp.next;
+            }
+        }
+    }
+
+        //实例化一个循环队列
+        let CCQueue = new Cyclicqueue(20);
+        CCQueue.print();
+</script>
+
+<script>
+    //初始化队列
+    function initccq() {
+        var num = document.getElementById("num").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('num').value = '';
+        CCQueue.maxlen = parseInt(num);
+        console.log(CCQueue.maxlen);
+        showCyclicQueue();
+    }
+
+    //添加结点
+    function push_key() {
+        var insert4 = document.getElementById("insert4").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('insert4').value = '';
+        CCQueue.append(parseInt(insert4));                       //调用添加结点函数
+        CCQueue.print();                                         //打印队列
+        showCyclicQueue();
+    }
+
+    //输入数组创建循环队列
+    function insert_arr(){
+        var pusharr = document.getElementById("pusharr").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('pusharr').value = '';
+        var c  = 0;
+        for(let i = 0; i < pusharr.length; i++) {
+            if(parseInt(pusharr[i]) < 10 && parseInt(pusharr[i]) >= 0) {
+                c = c * 10 + parseInt(pusharr[i]);
+                console.log("c = " + c);
+            } else {
+                CCQueue.append(c);
+                c = 0;
+            }
+        }
+        CCQueue.append(c);
+        showCyclicQueue();
+    }
+
+    //删除结点
+    function pop_key() {
+        CCQueue.remove();     //调用删除结点函数
+        CCQueue.print();     //打印队列
+        showCyclicQueue();
+    }
+
+    //查找指定位置的结点
+    function get_pos() {
+        var search1 = document.getElementById("search1").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('search1').value = '';
+        console.log(CCQueue.getData(parseInt(search1)));       //调用查找指定位置结点函数打印
+        showCyclicQueue();
+    }
+
+    //改变结点数值
+    function Change() {
+        var a = document.getElementById("change1").value;
+        var b = document.getElementById("change2").value;
+        var c = document.getElementById("change3").value;
+        document.getElementById('change1').value = '';
+        document.getElementById('change2').value = '';
+        document.getElementById('change3').value = '';
+        CCQueue.change(parseInt(a), parseInt(b), parseInt(c));
+        showCyclicQueue();
+    }
+
+</script>
+
+<script>
+    var showCyclicQueue = function() {
+        var svg = document.getElementById("svg");
+        var circleStr = "",lineStr = "", arrowStr = "", textStr = "";
+        var width = Number(svg.getAttribute("width"))-50;
+        var r = width / 2;
+        var vertexObj = {};//存放所有顶点的对象
+
+        let cx = 0, cy = 0;
+        cx = 500;
+        cy = 260;
+        //画初始圆
+        circleStr += '<circle cx="'+cx+'" cy="'+cy+'" r="180" fill="#8378EA"/></circle>';
+
+        //分块线
+        for(let i = 0; i < CCQueue.maxlen; i++) {
+            let linex = 0, liney = 0;
+            let angle = 0;
+            angle = i * 360 / CCQueue.maxlen; //计算画线的角度
+            linex = 500 + 180 * Math.cos(angle * Math.PI / 180);
+            liney = 260 + 180 * Math.sin(angle * Math.PI / 180);
+            //画线
+            lineStr += '<line x1="'+500+'" y1="'+260+'" x2="'+linex+
+                    '" y2="'+liney+'" style="stroke:black;stroke-width:2" />';
+        }
+
+
+        let dataarr = CCQueue.toArr(); //存为数组
+        for(let i = 0; i < CCQueue.length; i++) {
+            let textdata = dataarr[i];
+            let textcx = 0, textcy = 0;
+            let angle = 0;
+            //计算文本角度
+            angle = (CCQueue.posfront + i) * 360 / CCQueue.maxlen + 180 / CCQueue.maxlen;
+            textcx = 500 + 120 *  Math.cos(angle * Math.PI / 180);
+            textcy = 260 + 120 *  Math.sin(angle * Math.PI / 180);
+            //文本添加
+            textStr += '<text x="'+textcx+'" y="'+textcy+'" fill="black">'+textdata+'</text>';
+        }
+
+        //头指针
+        let startx = 0, starty = 0, endx = 0, endy = 0;
+        let angle = 0;
+        //头指针角度计算
+        angle = CCQueue.posfront * 360 / CCQueue.maxlen + 120 / CCQueue.maxlen;
+        startx = 500 + 216 *  Math.cos(angle * Math.PI / 180);
+        starty = 260 + 216 * Math.sin(angle * Math.PI / 180);
+        endx = 500 + 192 *  Math.cos(angle * Math.PI / 180);
+        endy = 260 + 192 * Math.sin(angle * Math.PI / 180);
+        //画线
+        lineStr += '<line x1="'+startx+'" y1="'+starty+'" x2="'+endx+
+                '" y2="'+endy+'" style="stroke:black;stroke-width:2" />';
+        //存储线的坐标
+        var obj = {
+            "startcx":startx,
+            "startcy":starty,
+            "endcx":endx,
+            "endcy":endy
+        };
+        //获取三角形三点坐标及角度
+        var getTriangle = function(obj) {
+            startcx = obj.startcx;
+            startcy= obj.startcy;
+            endcx= obj.endcx;
+            endcy= obj.endcy;
+            var x = endcx , y = endcy -10;
+            //三角形三点坐标
+            var points = [x-7,y+15,x+7,y+15,x,y].join(",");
+            //计算箭头角度（根据线）
+            var angle1 =180*Math.acos((startcy-endcy)/Math.sqrt((endcx-startcx)*(endcx-startcx)+
+                                    (startcy-endcy)*(startcy-endcy)))/Math.PI;
+            if(endcx-startcx < 0){
+                angle1 = 360 - angle1;
+            }
+            //存储三角形三点坐标及角度
+            var out = {
+                "points":points,
+                "angle1":angle1
+            };
+            return out;
+        };
+        var dd = getTriangle(obj); //根据线数据获取三角形数据
+        angle1 = [dd.angle1,endcx,endcy].join(","); //角度计算
+        //画三角形箭头
+        arrowStr += '<polygon points="'+dd.points+'" fill:"#171717" transform="rotate('+angle1+')"/>';
+
+
+        //设置头指针文本
+        let textx = 500 + 228 *  Math.cos(angle * Math.PI / 180);
+        let texty = 260 + 228 * Math.sin(angle * Math.PI / 180);
+        var frontdata = "front";
+        //添加文本
+        textStr += '<text x="'+textx+'" y="'+texty+'" fill="black">'+frontdata+'</text>';
+
+
+
+
+        //尾指针
+        startx = 0, starty = 0, endx = 0, endy = 0;
+        angle = 0;
+        angle = CCQueue.posrear * 360 / CCQueue.maxlen + 240 / CCQueue.maxlen;
+        startx = 500 + 216 *  Math.cos(angle * Math.PI / 180);
+        starty = 260 + 216 * Math.sin(angle * Math.PI / 180);
+        endx = 500 + 192 *  Math.cos(angle * Math.PI / 180);
+        endy = 260 + 192 * Math.sin(angle * Math.PI / 180);
+        //画线
+        lineStr += '<line x1="'+startx+'" y1="'+starty+'" x2="'+endx+
+                '" y2="'+endy+'" style="stroke:black;stroke-width:2" />';
+        //存储线的坐标
+        obj = {
+            "startcx":startx,
+            "startcy":starty,
+            "endcx":endx,
+            "endcy":endy
+        };
+
+        dd = getTriangle(obj);
+        angle1 = [dd.angle1,endcx,endcy].join(",");
+        //画三角形箭头
+        arrowStr += '<polygon points="'+dd.points+'" fill:"#171717" transform="rotate('+angle1+')"/>';
+
+
+        //尾结点文本
+        textx = 500 + 228 *  Math.cos(angle * Math.PI / 180);
+        texty = 260 + 228 * Math.sin(angle * Math.PI / 180) + 10;
+        var reardata = "rear";
+        //文本添加
+        textStr += '<text x="'+textx+'" y="'+texty+'" fill="black">'+reardata+'</text>';
+        //添加至svg
+        svg.innerHTML = circleStr+lineStr+textStr+arrowStr;
+    }
+</script>
+
+</body>
+</html>

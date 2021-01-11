@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>二叉搜索树</title>
+    <link rel="stylesheet" type="text/css" href="font.css" />
+    <style type="text/css">
+        .container{
+            width: 600px;
+            height: 800px;
+            margin: 0 auto;
+        }
+        .node{
+            width: 100px;
+            min-height: 100px;
+        }
+        .circle{
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+
+
+<body>
+<!--大标题-->
+<div class = "title">二叉搜索树（Binary Search Tree）</div>
+<input type='text' id='all' style="border:0px solid white; width:20px" />
+
+
+
+<!--插入元素-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="val">
+    <input type="button" value="插入元素" onclick="insert_key()">
+</div>
+<div id="test_div"></div>
+
+<!--//新加入：输入数组生成二叉树-->
+<div class = func>
+    <input placeholder="输入数组" type="text" id="pusharr">
+    <input type="button" value="输入数组生成二叉树" onclick="insert_arr()">
+</div>
+<div id="test_div"></div>
+
+<!--删除元素-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="del">
+    <input type="button" value="删除元素" onclick="delete_node()">
+</div>
+<div id="test_div"></div>
+
+<!--查找数值-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="sea">
+    <input type="button" value="查找元素" onclick="search_node()">
+</div>
+<div id="test_div"></div>
+
+
+<!--修改数值-->
+<div class = func>
+    <input placeholder="输入要修改结点的数值" type="text" id="change1">
+    <input placeholder="输入结点的左节点数值" type="text" id="change2">
+    <input placeholder="输入结点的右节点数值" type="text" id="change3">
+    <input placeholder="输入新数值" type="text" id="change4">
+    <input type="button" value="修改完成" onclick="change_tree()">
+</div>
+<div id="test_div"></div>
+
+
+<br></br>
+
+<div class="container">
+    <div class="control">
+        <select id="select">
+            <option>前序遍历</option>
+            <option>后序遍历</option>
+            <option>中序遍历</option>
+        </select>
+        <input type="button" name="click" value="开始遍历" id="button">
+    </div>
+    <svg id="svg" width="600" height="600"></svg>
+</div>
+
+
+
+
+<script>
+    // 单个节点对象
+    class Node {
+        //初始化结构
+        constructor (data, left, right, floor) {
+            this.data = data;     //数据
+            this.left = left;     //左孩子
+            this.right = right;   //右孩子
+            this.floor = floor;   //层数
+        }
+    }
+
+    // 二叉搜索树类
+    class BinarySearchTree {
+        //初始化树
+        constructor () {
+            this.root = null;
+        }
+
+        // 插入结点
+        insert (data) {
+            let cNode = new Node(data, null, null,1);
+            // 空树
+            if (!this.root) {
+                this.root = cNode;
+                return ;
+            }
+            // 非空树
+            let currentNode = this.root; //当前结点
+            currentNode.floor = 1;  //根节点层数定义为 1；
+            let parent = null; //当前结点父结点
+            // 遍历直到找到对应结点插入为止
+            while(1) {
+                parent = currentNode;
+                // 小于当前结点找左子树
+                if (data < currentNode.data) {
+                    currentNode = currentNode.left;
+                    if (currentNode === null) {
+                        parent.left = cNode;
+                        cNode.floor = parent.floor + 1;
+                        break;
+                    }
+                }
+                // 大于当前结点找右子树
+                else if ( data > currentNode.data ) {
+                    currentNode = currentNode.right;
+                    if (currentNode === null) {
+                        parent.right = cNode;
+                        cNode.floor = parent.floor + 1;
+                        break;
+                    }
+                }
+                // 相等
+                else {
+                    break;
+                }
+            }
+        }
+
+
+
+//        // 传入数组，创建树
+//        create (arr) {
+//            if (!arr.length) {
+//                this.root = null;
+//            }else {
+//                let length = arr.length;
+//                for (let i = 0; i < length; i++) {
+//                    this.insert(arr[i]);
+//                }
+//            }
+//        }
+
+
+        // 二叉树删除
+        remove (data) {
+            this.root = this.removeNodeByData(this.root, data);
+        }
+
+
+        // 返回删除对应值后的  "node"，从node开始找data
+        removeNodeByData (node, data) {
+            if (node === null) {
+                return null;
+            }
+            //如果待删除结点的数值小于当前结点，递归向左查找
+            if(data < node.data) {
+                node.left = this.removeNodeByData(node.left, data);
+                return node;
+            } else if(data > node.data) { //如果待删除结点大于当前结点，递归向右查找
+                node.right = this.removeNodeByData(node.right, data);
+                return node;
+            } else {
+                //如果删除叶子，直接删除
+                if(node.left == null && node.right == null) {
+                    node = null;
+                    return node;
+                } else if(node.left == null) { //如果删除左孩子为空的结点，返回右孩子
+                    return node.right;
+                } else if(node.right == null) { //如果删除右孩子为空的结点，返回左孩子
+                    return node.left;
+                } else { //如果左右孩子都非空
+                    var maxNode = this.getMax(node.left); //获取左子树中中序遍历最后的结点，也是最大的结点
+                    node.data = maxNode.data; //更新该结点
+                    node.left = this.removeNodeByData(node.left, maxNode.data);//删除该点左子树最大结点
+                    return node;
+                }
+            }
+        }
+
+
+        // 查找值为data的结点
+        findByNonRecur(data) {
+            let findarr = [];
+            let current = this.root;
+            while (current !== null) {
+                findarr.push(current.data);
+                if (data === current.data) { //已找到
+                    break;
+                }else if (data < current.data) { //如果查找结点小于当前数值
+                    current = current.left;
+                } else if (data > current.data) { //如果查找结点大于当前数值
+                    current = current.right;
+                }
+            }
+            console.log("查找过程为：" + findarr);
+            return findarr; //返回查找结点
+        }
+
+
+        // 获取最大值
+        findMax() {
+            let current = this.root;
+            while(current.right !== null) {
+                current = current.right;
+            }
+            return current.data
+        }
+
+
+        //获得最大值结点,删除结点调用
+        getMax(node) {
+            let current = node;
+            while(current.right != null) {
+                current = current.right;
+            }
+            return current;
+        }
+
+
+        // 获取最小值
+        findMin() {
+            let current = this.root;
+            while(current.left!==null){
+                current = current.left
+            }
+            return current.data
+        }
+
+
+        //获取根的值
+        findRootvalue() {
+            return this.root.data;
+        }
+
+
+        //获取根结点,可视化调用
+        findRoot() {
+            return this.root;
+        }
+
+
+        //找到某一层最大元素个数，可视化确定画布宽度
+        findMaxelements(node) {
+            var max = 0;
+            if (this.root == null) {
+                return max;
+            }
+            let queue = [this.root]; //队列存每一层元素
+            while (queue.length) {
+                let level = queue.length; //当前队列长度
+                for (let i = 0; i < level; i++) {
+                    let curr = queue.shift(); //出队
+                    curr.left ? queue.push(curr.left) : ''; //push下一层
+                    curr.right ? queue.push(curr.right) : ''; //push下一层
+                }
+                max = level > max ? level : max; //更新最大元素个数
+            }
+            return max; //返回最大元素个数
+        }
+
+
+        //一共有几层
+        findLevel(node) {
+            var cnt = 0;
+            if (this.root == null) {
+                return 0;
+            }
+            let queue = [this.root];
+            while (queue.length) {
+                let level = queue.length;
+                for (let i = 0; i < level; i++) {
+                    let curr = queue.shift();
+                    curr.left ? queue.push(curr.left) : '';
+                    curr.right ? queue.push(curr.right) : '';
+                }
+                cnt++; //记录层数
+            }
+            return cnt;
+        }
+
+        //改变数值，层序遍历找到结点改变数值
+        change(now, l, r, replacement) {
+            if (this.root == null) {
+                return 0;
+            }
+            let queue = [this.root];
+            while (queue.length) {
+                let level = queue.length;
+                for (let i = 0; i < level; i++) {
+                    let curr = queue.shift();
+                    if(curr.data == now) {
+                        if(l == 0 && curr.left == null && r == 0 && curr.right == null) {
+                            if(curr.which == 0 && replacement < curr.father.data)
+                                curr.data = replacement;
+                            else if(curr.which == 1 && replacement > curr.father.data)
+                                curr.data = replacement;
+                            else alert("更改后不满足二叉树定义！");
+                            return;
+                        } else if(l == 0 && curr.left == null && curr.right.data == r) {
+                            if(curr.which == 0 && replacement < r)
+                                curr.data = replacement;
+                            else if(curr.which == 1 && replacement < r && replacement > curr.father.data)
+                                curr.data = replacement;
+                            else alert("更改后不满足二叉树定义！");
+                            return;
+                        } else if(r == 0 && curr.right == null && curr.left.data == l) {
+                            if(curr.which == 1 && replacement > l)
+                                curr.data = replacement;
+                            else if(curr.which == 0 && replacement > l && replacement < curr.father.data)
+                                curr.data = replacement;
+                            else alert("更改后不满足二叉树定义！");
+                            return;
+                        } else if(curr.left.data == l && curr.right.data == r) {
+                            if(replacement > l && replacement < r)
+                                curr.data = replacement;
+                            else alert("更改后不满足二叉树定义！");
+                            return;
+                        }
+                    }
+                    curr.left ? queue.push(curr.left) : '';
+                    curr.right ? queue.push(curr.right) : '';
+                }
+            }
+        }
+
+
+        // 先序遍历
+        preTravel(node) {
+            let preTravelArr = [];
+            (function _preTravel (node) {
+                if (node !== null) {
+                    preTravelArr.push(node.data); //先存入根
+                    _preTravel(node.left); //访问左
+                    _preTravel(node.right); //访问右
+                }
+            })(node)
+            return preTravelArr;
+        }
+        // 中序遍历
+        midTravel(node) {
+            let midTravelArr = [];
+            (function _midTravel (node) {
+                if (node !== null) {
+                    _midTravel(node.left);
+                    midTravelArr.push(node.data);
+                    _midTravel(node.right);
+                }
+            })(node)
+            return midTravelArr;
+        }
+        // 后序遍历 -- 左、右、根
+        aftTravel(node) {
+            let aftTravelArr = [];
+            (function _aftTravel (node) {
+                if (node !== null) {
+                    _aftTravel(node.left);
+                    _aftTravel(node.right);
+                    aftTravelArr.push(node.data);
+                }
+            })(node)
+            return aftTravelArr;
+        }
+
+
+        //层序遍历生成数组
+        levelOrder(node) {
+            var cnt = 1;
+            if (this.root == null) {
+                return [];
+            }
+            let result = []; //层序遍历后数组
+            let queue = [this.root];
+            this.root.widthRatio = 1;          //用来计算倾角
+            this.root.father = this.root;     //规定根的父亲为自己
+            this.root.which = 0;              // 判断是左孩子还是右孩子
+            while (queue.length) {
+                let level = queue.length;
+                for (let i = 0; i < level; i++) {
+                    let curr = queue.shift();
+                    curr.left ? queue.push(curr.left) : '';
+                    curr.right ? queue.push(curr.right) : '';
+                    curr.floor = cnt;
+                    result.push(curr);
+                    console.log("当前结点：" + curr.data + ", 孩子数为：" + level);
+                    if(curr.left) {
+                        curr.left.father = curr;         //记录父结点
+                        curr.left.which = 0;             //记录左孩子
+                        curr.left.widthRatio = curr.widthRatio / 2;  //记录比例
+                    }
+                    if(curr.right) {
+                        curr.right.father = curr;       //记录父结点
+                        curr.right.widthRatio = curr.widthRatio / 2;   //记录角度比例
+                        curr.right.which = 1;           //记录右孩子
+                    }
+                }
+                cnt++; //用来记录层数
+            }
+            return result; //返回层序遍历结果
+        }
+
+
+    }
+
+    //实例化创建树
+    let BSTree = new BinarySearchTree();
+</script>
+
+
+
+<!--插入元素-->
+<script>
+    function insert_key(){
+        var val = document.getElementById("val").value;
+        var div = document.getElementById("test_div");
+//            div.innerHTML += val + " ";
+        document.getElementById('val').value = '';
+        BSTree.insert(parseInt(val));                  //调用插入元素函数
+        showTree();                                    //显示插入后的树
+    }
+</script>
+
+<!--输入数组创建二叉树-->
+<script>
+    function insert_arr(){
+        var pusharr = document.getElementById("pusharr").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('pusharr').value = '';
+        var c  = 0;
+        for(let i = 0; i < pusharr.length; i++) {
+            if(parseInt(pusharr[i]) < 10 && parseInt(pusharr[i]) >= 0) {
+                c = c * 10 + parseInt(pusharr[i]);
+                console.log("c = " + c);
+            } else {
+                BSTree.insert(c);
+                c = 0;
+            }
+        }
+        BSTree.insert(c);
+        showTree();
+    }
+</script>
+
+
+<!--删除元素+输出层序遍历-->
+<script>
+    function delete_node(){
+        var del = document.getElementById("del").value;
+        document.getElementById('del').value = '';
+        BSTree.remove(parseInt(del));                     //调用删除元素函数
+        showTree();                                       //显示删除后的树
+    }
+</script>
+
+<!--查找元素-->
+<script>
+    function search_node(){
+        var sea = document.getElementById("sea").value;
+        document.getElementById('sea').value = '';
+        var findarr1 = BSTree.findByNonRecur(parseInt(sea));                     //调用删除元素函数
+        for(let i = 0; i < findarr1.length; i++) {
+            setTimeout(function(i){
+                findTreeTraverse(findarr1[i],parseInt(sea),findarr1, BSTree.levelOrder(BSTree.findRoot()));
+            },2000*i,i);
+        }
+    }
+</script>
+
+<!--改变数值-->
+<script>
+    function change_tree() {
+        var now = document.getElementById("change1").value;
+        var l = document.getElementById("change2").value;
+        var r = document.getElementById("change3").value;
+        var replacement = document.getElementById("change4").value;
+        document.getElementById("change1").value = '';
+        document.getElementById("change2").value = '';
+        document.getElementById("change3").value = '';
+        document.getElementById("change4").value = '';
+        BSTree.change(parseInt(now), parseInt(l), parseInt(r), parseInt(replacement));
+        showTree();
+    }
+</script>
+
+
+
+
+
+<!--可视化-->
+<script>
+    var showTree = function(){
+        var svg = document.getElementById("svg"); //获取画布
+        var circleStr = "",lineStr = "",textStr = "";//圆、线和文本的HTML字符串
+        var nodes = BSTree.levelOrder(BSTree.findRoot());//层序遍历生成数组存入nodes
+
+        //计算画树需要的画布尺寸
+        var size = (function(nodes){
+            var max = BSTree.findMaxelements(BSTree.findRoot()); //通过一层最多元素个数确定宽度
+            var height = BSTree.findLevel(BSTree.findRoot()); //通过高度确定高度
+            var size = {
+                width: max*200,
+                height: height *80+480
+            }
+            return size;
+        })(nodes);
+
+        //设置SVG画布尺寸
+        svg.setAttribute("width",size.width);
+        svg.setAttribute("height",size.height);
+        svg.parentNode.style.width = size.width+"px";
+        var width = size.width;
+
+
+        //遍历放置结点
+        for(let i =0;i<nodes.length;i++){
+            let nodeColor = "#9F79EE";
+
+            let cx = 0, cy = 0;//当前结点的定位像素坐标
+            let father = nodes[i].father;
+
+            //计算根结点在画布中的位置
+            if(i === 0){
+                father.cx = width/2;
+            }
+
+            //计算当前结点的摆放位置
+            let start = father.cx - width*father.widthRatio/2;
+            cx = start + width*nodes[i].widthRatio*(nodes[i].which + 0.5);
+            cy = nodes[i].floor * 80 + 80;
+            nodes[i].cx = cx;
+            nodes[i].cy = cy;
+            //连当前结点与父结点的线
+            lineStr += '<line x1="'+cx+'" y1="'+cy+'" x2="'+nodes[i].father.cx+
+                    '" y2="'+nodes[i].father.cy+'" style="stroke:black;stroke-width:2" />';
+            //结点
+            circleStr += '<circle cx="'+cx+'" cy="'+cy+'" r="20" fill="'+nodeColor+'"/></circle>';
+            //调整结点内文本位置
+            var textcx = nodes[i].data>9?(nodes[i].cx-10):(nodes[i].cx-5),
+                    textcy = (nodes[i].cy+6);
+            textStr += '<text x="'+textcx+'" y="'+textcy+'" fill="white">'+nodes[i].data+'</text>';
+        }
+        svg.innerHTML = lineStr+circleStr+textStr;
+    }
+
+    //与showtree类似，只在遍历时调用
+    var showTreeTraverse = function(id, arr, caseid) {
+        var svg = document.getElementById("svg");
+        svg.innerHTML = "";
+        var circleStr = "",lineStr = "",textStr = "";//圆、线和文本的HTML字符串
+        var nodes = BSTree.levelOrder(BSTree.findRoot());//层序遍历生成数组
+
+        //计算画树需要的画布尺寸
+        var size = (function(nodes){
+            var max = BSTree.findMaxelements(BSTree.findRoot());
+            var height = BSTree.findLevel(BSTree.findRoot());
+            var size = {
+                width: max*200,
+                height: height *80+480
+            }
+            return size;
+        })(nodes);
+
+
+        //设置SVG画布尺寸
+        svg.setAttribute("width",size.width);
+        svg.setAttribute("height",size.height);
+        svg.parentNode.style.width = size.width+"px";
+        var width = size.width;
+
+        //遍历所有树的结点，生成圆、线和文本的HTML字符串
+        for(let i = 0; i < nodes.length; i++){
+            let nodeColor = nodes[i].data === id?"#080808":"#9F79EE";
+
+            let cx = 0, cy = 0;//当前结点的定位像素坐标
+            let father = nodes[i].father;
+            //如果是根节点放在正中间
+            if(i === 0){
+                father.cx = width/2;
+            }
+            //计算当前结点坐标
+            let start = father.cx - width*father.widthRatio/2;
+            cx = start + width*nodes[i].widthRatio*(nodes[i].which + 0.5);
+            cy = nodes[i].floor * 80 + 80;
+            nodes[i].cx = cx;
+            nodes[i].cy = cy;
+            //连当前结点与父结点的线
+            lineStr += '<line x1="'+cx+'" y1="'+cy+'" x2="'+nodes[i].father.cx+
+                    '" y2="'+nodes[i].father.cy+'" style="stroke:black;stroke-width:2" />';
+            //结点
+            circleStr += '<circle cx="'+cx+'" cy="'+cy+'" r="20" fill="'+nodeColor+'"/></circle>';
+            //调整圆内的文本缩进
+            var textcx = nodes[i].data>9?(nodes[i].cx-10):(nodes[i].cx-5),
+                    textcy = (nodes[i].cy+6);
+            textStr += '<text x="'+textcx+'" y="'+textcy+'" fill="white">'+nodes[i].data+'</text>';
+        }
+        //svg图显示遍历次序
+        var casestr;
+        if(caseid == 0) {
+            casestr = "前序";
+        } else if(caseid == 1) {
+            casestr = "后序";
+        } else if(caseid == 2) {
+            casestr = "中序";
+        }
+        textStr += '<text x="'+0+'" y="'+30+'" fill="black">'+casestr + '遍历顺序为：'+'</text>';
+        for(let i = 0; i < arr.length; i++) {
+            if(i != arr.length - 1) {
+                textStr += '<text x="'+35 * i+'" y="'+50+'" fill="black">'+arr[i] + ','+'</text>';
+            } else {
+                textStr += '<text x="'+35 * i+'" y="'+50+'" fill="black">'+arr[i]+'</text>';
+            }
+        }
+        svg.innerHTML = lineStr+circleStr+textStr;
+    }
+
+
+    var nodes = BSTree.levelOrder(BSTree.findRoot());//层序遍历生成数组
+    var traversalArr = BSTree.aftTravel(BSTree.findRoot());
+    showTreeTraverse(null,nodes);
+    var select = document.getElementById("select");
+    var button = document.getElementById("button");
+
+    //控制按钮只能按一次
+    button.addEventListener("click",function(){
+        if(button.click===false){
+            return;
+        }else{
+            button.click = false;
+        }
+        //console.log("button.click = " + button.click);
+        var nodes = BSTree.levelOrder(BSTree.findRoot());//层序遍历生成数组
+        var traversalArr = BSTree.aftTravel(BSTree.findRoot());
+        var index = select.selectedIndex ;
+        // 三种选择遍历数组
+        switch(index){
+            case 0: traversalArr = BSTree.preTravel(BSTree.findRoot());
+                break;
+            case 1: traversalArr = BSTree.aftTravel(BSTree.findRoot());
+                break;
+            case 2: traversalArr = BSTree.midTravel(BSTree.findRoot());
+                break;
+
+        }
+
+
+        //高亮遍历点
+        console.log("遍历数组：" + traversalArr);
+        for(let i =0;i<=traversalArr.length;i++){
+            setTimeout(function(i){
+                showTreeTraverse(traversalArr[i],traversalArr, index, nodes);
+                if(i>=traversalArr.length){
+                    //按钮再按一遍没用
+                    button.click = true;
+                }
+            },400*i,i);
+        }
+    });
+
+    //查找函数
+    var findTreeTraverse = function(id, key, arr) {
+        var svg = document.getElementById("svg");
+        svg.innerHTML = "";
+        var circleStr = "",lineStr = "",textStr = "";//圆、线和文本的HTML字符串
+        var nodes = BSTree.levelOrder(BSTree.findRoot());//层序遍历生成数组
+
+        //计算画树需要的画布尺寸
+        var size = (function(nodes){
+            var max = BSTree.findMaxelements(BSTree.findRoot());
+            var height = BSTree.findLevel(BSTree.findRoot());
+            var size = {
+                width: max*200,
+                height: height *80+480
+            }
+            return size;
+        })(nodes);
+        //console.log("传进来的参数：id = " + id + "nodes = ")
+
+        //设置SVG画布尺寸
+        svg.setAttribute("width",size.width);
+        svg.setAttribute("height",size.height);
+        svg.parentNode.style.width = size.width+"px";
+        var width = size.width;
+
+        //遍历所有树的结点，生成圆、线和文本的HTML字符串
+        for(let i = 0; i < nodes.length; i++){
+            let nodeColor = nodes[i].data === id?"#080808":"#9F79EE";
+
+            let cx = 0, cy = 0;//当前结点的定位像素坐标
+            let father = nodes[i].father;
+            //如果是根节点放在正中间
+            if(i === 0){
+                father.cx = width/2;
+            }
+            //计算当前结点坐标
+            let start = father.cx - width*father.widthRatio/2;
+            cx = start + width*nodes[i].widthRatio*(nodes[i].which + 0.5);
+            cy = nodes[i].floor * 80 + 80;
+            nodes[i].cx = cx;
+            nodes[i].cy = cy;
+            //连当前结点与父结点的线
+            lineStr += '<line x1="'+cx+'" y1="'+cy+'" x2="'+nodes[i].father.cx+
+                    '" y2="'+nodes[i].father.cy+'" style="stroke:black;stroke-width:2" />';
+            //结点
+            circleStr += '<circle cx="'+cx+'" cy="'+cy+'" r="20" fill="'+nodeColor+'"/></circle>';
+            //调整圆内的文本缩进
+            var textcx = nodes[i].data>9?(nodes[i].cx-10):(nodes[i].cx-5),
+                    textcy = (nodes[i].cy+6);
+            textStr += '<text x="'+textcx+'" y="'+textcy+'" fill="white">'+nodes[i].data+'</text>';
+        }
+        //svg图显示遍历次序
+        var comstr = '';
+        if(id > key) {
+            comstr = key + '<' + id + ', 转移至左子树';
+        } else if(id < key) {
+            comstr = key + '>' + id + ', 转移至右子树';
+        } else if(id == key) {
+            comstr = key + '=' + id + ', 查找成功！';
+        }
+        textStr += '<text x="'+0+'" y="'+70+'" fill="black">'+ '查找过程：'+ comstr+'</text>';
+        if(id == key) {
+            for(let i = 0; i < arr.length; i++) {
+                if(i != arr.length - 1) {
+                    textStr += '<text x="'+35 * i+'" y="'+90+'" fill="black">'+arr[i] + ','+'</text>';
+                } else {
+                    textStr += '<text x="'+35 * i+'" y="'+90+'" fill="black">'+arr[i]+'</text>';
+                }
+            }
+        }
+
+
+        svg.innerHTML = lineStr+circleStr+textStr;
+    }
+
+</script>
+
+
+
+</body>
+</html>

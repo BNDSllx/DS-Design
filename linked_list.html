@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>链表</title>
+    <link rel="stylesheet" type="text/css" href="font.css" />
+</head>
+
+
+<br>
+<!--大标题-->
+<div class = "title">链表（Linked List）</div>
+<input type='text' id='all' style="border:0px solid white; width:20px" />
+
+
+<!--尾部添加结点-->
+<div class = func>
+    <input placeholder="输入数值" type="text" id="insert1">
+    <input type="button" value="尾部添加结点（Push）" onclick="push_key()">
+</div>
+<div id="test_div"></div>
+
+<!--输入数组生成链表-->
+<div class = func>
+    <input placeholder="输入数组" type="text" id="pusharr">
+    <input type="button" value="输入数组生成链表" onclick="insert_arr()">
+</div>
+<div id="test_div"></div>
+
+<!--定点添加结点-->
+<div class = func>
+    <input placeholder="输入要插入结点的数值" type="text" id="insert2">
+    <input placeholder="输入要插入结点的位置" type="text" id="insert3">
+    <input type="button" value="定点添加结点（Push at Designated location）" onclick="push_key_atPos()">
+</div>
+<div id="test_div"></div>
+
+<!--定点删除结点-->
+<div class = func>
+    <input placeholder="输入要删除结点的位置" type="text" id="delete1">
+    <input type="button" value="定点删除结点（Pop at Designated data）" onclick="pop_key_atPos()">
+</div>
+<div id="test_div"></div>
+
+<!--指定数据删除结点-->
+<div class = func>
+    <input placeholder="输入要删除结点的数值" type="text" id="delete2">
+    <input type="button" value="指定数据删除结点（Pop at Designated location）" onclick="pop_key_atData()">
+</div>
+<div id="test_div"></div>
+
+<!--改变数值-->
+<div class = func>
+    <input placeholder="输入要更改的数值" type="text" id="change1">
+    <input placeholder="输入下一个结点数值" type="text" id="change2">
+    <input placeholder="输入要更改的数值" type="text" id="change3">
+    <input type="button" value="修改完成" onclick="Change()">
+</div>
+<div id="test_div"></div>
+
+
+
+<br></br>
+
+
+<div>
+    <svg id="svg" width="1000" height="300"></svg>
+</div>
+
+
+
+
+
+<script>
+   //创建节点类
+    class Node {
+        constructor(data) {
+            this.data = data;  //数据
+            this.next = null;  //指针
+        }
+    }
+    //创建链表类
+    class LinkedList {
+        //创建构造函数
+        constructor() {
+            this.length = 0;    //链表长度
+            this.head = null;
+            this.tail = null;
+        }
+
+
+        //向链表尾部添加一个新节点
+        append(data) {
+            var node = new Node(data);
+            var current;
+            if(this.head == null) {
+                this.head = node;
+                this.tail = node;
+            } else {
+                this.tail.next = node;
+                this.tail = this.tail.next;
+            }
+            this.length++;
+        }
+
+
+        //向链表特定位置添加一个新节点
+        insert(pos, data) {
+            if(pos >= 0 && pos < this.length) {
+                var node = new Node(data);
+                var current = this.head;
+                var previous;
+                var index = 0;
+
+                if(pos == 0) {
+                    node.next = current;
+                    this.head = node;
+                } else if(pos == this.length - 1) {
+                    this.tail.next = node;
+                    this.tail = this.tail.next;
+                } else {
+                    while(index++ < pos) {
+                        previous = current;
+                        current = current.next;
+                    }
+                    node.next = current;
+                    previous.next = node;
+                }
+                this.length++;
+                return true;
+            } else {
+                alert("The position is illegal!");
+                return false;
+            }
+        }
+
+
+        //从链表指定位置删除一项
+        removeAt(pos) {
+            if (pos > -1 && pos < this.length) {
+                var current = this.head;
+                var previous;
+                var index = 0;
+                if (pos == 0) { //移除第一项
+                    this.head = current.next;
+                } else {
+                    while (index++ < pos) {
+                        previous = current;
+                        current = current.next;
+                    }
+                    previous.next = current.next;
+                }
+                this.length--;
+                if(pos == this.length - 1) {
+                    this.tail = previous;
+                }
+                return current.data;
+            } else {
+                alert("The position is illegal!");
+                return null;
+            }
+        }
+
+
+        //为完成指定数据删除结点
+        //返回data对应元素的下标
+        indexOf(data) {
+            console.log("data = " + data);
+            var current = this.head;
+            var index = 0;   //数据下标
+            while(current) {
+                if(current.data == data) {
+                    return index;
+                }
+                index++;
+                current = current.next;
+            }
+            alert("The data input is unavailable!");
+            return -1;
+        }
+
+        //删除数据为data的元素
+        remove(data) {
+            var index = this.indexOf(data);
+            return this.removeAt(index);
+        }
+
+        //判断链表是否为空
+        isEmpty() {
+            return this.length == 0;
+        }
+
+        //返回链表的长度
+        size() {
+            return this.length;
+        }
+
+        //访问链表的head
+        getHead() {
+            return this.head;
+        }
+
+
+        //打印链表
+        toString() {
+            var current = this.head;
+            var string = "";
+            while(current) {
+                string += ", " + current.data;
+                current = current.next;
+            }
+            return string.slice(1);  //从字符串的第一个位置提取字符串
+        }
+
+        //将链表值存为数组
+        toArr() {
+            var current = this.head;
+            var arr = [];
+            while(current) {
+                arr.push(current.data);
+                current = current.next;
+            }
+            return arr;
+        }
+
+        //将链表每个结点存为数组
+        toClass() {
+            var current = this.head;
+            var arr = [];
+            while(current) {
+                arr.push(current);
+                current = current.next;
+            }
+            return arr;
+        }
+
+        //打印链表
+        print() {
+            console.log(this.toString());
+        }
+
+        //改数值
+        change(a, b, c) {
+            var tmp = this.head;
+            while(tmp && tmp != this.tail) {
+                if(tmp.data == a && tmp.next == null && b == 0) {
+                    tmp.data = c;
+                    return;
+                }
+                else if(tmp.data == a && tmp.next.data == b) {
+                    tmp.data = c;
+                    return;
+                }
+                if(!tmp.next) {
+                    alert("The data input is unavailable!");
+                    return;
+                }
+                tmp = tmp.next;
+            }
+        }
+   }
+   //创建一个链表对象
+    let LkList = new LinkedList();
+</script>
+
+<script>
+    //尾部添加结点
+    function push_key() {
+        var insert1 = document.getElementById("insert1").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('insert1').value = '';
+        LkList.append(parseInt(insert1));       //调用向尾部添加结点函数
+        LkList.print();                         //输出链表
+        showLinkedList();
+    }
+
+    //输入数组创建链表
+    function insert_arr(){
+        var pusharr = document.getElementById("pusharr").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('pusharr').value = '';
+        var c  = 0;
+        for(let i = 0; i < pusharr.length; i++) {
+            if(parseInt(pusharr[i]) < 10 && parseInt(pusharr[i]) >= 0) {
+                c = c * 10 + parseInt(pusharr[i]);
+                console.log("c = " + c);
+            } else {
+                LkList.append(c);
+                c = 0;
+            }
+        }
+        LkList.append(c);
+        showLinkedList();
+    }
+
+
+    //定点添加结点
+    function push_key_atPos() {
+        var insert2 = document.getElementById("insert2").value;
+        var insert3 = document.getElementById("insert3").value;
+        var div = document.getElementById("test_div");
+        document.getElementById('insert2').value = '';
+        document.getElementById('insert3').value = '';
+        LkList.insert(parseInt(insert3), parseInt(insert2));       //调用定位置添加结点函数
+        LkList.print();                                           //输出链表
+        showLinkedList();
+    }
+
+
+    //定点删除结点
+    function pop_key_atPos() {
+        var delete1 = document.getElementById("delete1").value;
+        var div = document.getElementById("test_div");
+        document.getElementById("delete1").value = '';
+        LkList.removeAt(parseInt(delete1));                         //调用定位置删除结点函数
+        LkList.print();                                             //输出链表
+        showLinkedList();
+    }
+
+    //指定数据删除结点
+    function pop_key_atData() {
+        var delete2 = document.getElementById("delete2").value;
+        var div = document.getElementById("test_div");
+        document.getElementById("delete2").value = '';
+        LkList.remove(parseInt(delete2));                          //调用指定数据删除结点函数
+        LkList.print();                                           //输出链表
+        showLinkedList();
+    }
+
+    //改变数值
+    function Change() {
+        var a = document.getElementById("change1").value;
+        var b = document.getElementById("change2").value;
+        var c = document.getElementById("change3").value;
+        document.getElementById('change1').value = '';
+        document.getElementById('change2').value = '';
+        document.getElementById('change3').value = '';
+        LkList.change(parseInt(a), parseInt(b), parseInt(c));
+        showLinkedList();
+    }
+</script>
+
+<script>
+    var showLinkedList = function() {
+        var svg = document.getElementById("svg");
+        var circleStr = "",lineStr = "", textStr = "", arrowStr = "";
+        var nodes = LkList.toClass();
+        //用来计算画线长度
+        var width = Number(svg.getAttribute("width"))-50;
+        var r = width / 2;
+        var vertexObj = {};//存放所有顶点的对象
+
+        //圆和内部数字
+        for(let i = 0; i < nodes.length; i++) {
+            let data = nodes[i].data;
+            let cx = 0, cy = 0;
+            cx = 50 + 85 * i;
+            cy = 100;
+            let obj = {
+                "cx": cx,
+                "cy": cy
+            };
+            vertexObj[i] = obj; //存储圆的数据
+            //画圆
+            circleStr += '<circle cx="'+cx+'" cy="'+cy+'" r="30" fill="#9F79EE"/></circle>';
+            //判断是三位数两位数一位数
+            let textcx = data>99?(cx-15):data > 9?(cx-10):(cx - 5);
+            let textcy = cy+6;
+            //文本
+            textStr += '<text x="'+textcx+'" y="'+textcy+'" fill="black">'+data+'</text>';
+        }
+
+        //线和数字
+        for(let i = 0; i < nodes.length - 1; i++) {
+            let startcx = 0, startcy = 0,endcx = 0,endcy = 0;//当前结点的定位像素坐标
+            //判断结点是否已经输入过
+            if(!vertexObj[i]||!vertexObj[i+1]){
+                throw Error("边数组中有结点不在结点数组中");
+                return;
+            }
+            startcx = vertexObj[i].cx;
+            startcy = vertexObj[i].cy;
+            endcx = vertexObj[i + 1].cx;
+            endcy = vertexObj[i + 1].cy;
+            //画线
+            lineStr += '<line x1="'+startcx+'" y1="'+startcy+'" x2="'+endcx+
+                    '" y2="'+endcy+'" style="stroke:#999;stroke-width:2" />';
+            //画线坐标存储
+            var obj = {
+                "startcx":startcx,
+                "startcy":startcy,
+                "endcx":endcx,
+                "endcy":endcy
+            };
+            //获取三角形的三个点坐标以及角度
+            var getTriangle = function(obj) {
+                startcx = obj.startcx;
+                startcy= obj.startcy;
+                endcx= obj.endcx;
+                endcy= obj.endcy;
+                var x = endcx, y = endcy+20;
+                //计算三角形三个点的坐标
+                var points = [x-7,y+15,x+7,y+15,x,y].join(",");
+                var angle = 0;
+                //随着线的方向改变，三角形的方向跟着改变，计算角度值
+                angle =180*Math.acos((startcy-endcy)/Math.sqrt((endcx-startcx)*(endcx-startcx)+
+                                        (startcy-endcy)*(startcy-endcy)))/Math.PI;
+                if(endcx-startcx < 0){
+                    angle = 360 - angle;
+                }
+                //存储三角形三个点坐标以及角度
+                var out = {
+                    "points":points,
+                    "angle":angle
+                };
+                return out;
+            };
+            var dd = getTriangle(obj); //传入线的数据获取三角形数据
+            var angle = [dd.angle,endcx,endcy].join(","); //角度计算
+            //画三角形箭头
+            arrowStr += '<polygon points="'+dd.points+'" fill:"#171717" transform="rotate('+angle+')"/>';
+
+        }
+
+        //头结点指针
+        let startcx = 0, startcy = 0,endcx = 0,endcy = 0;//当前结点的定位像素坐标
+        //只用取当前第一个结点的坐标
+        startcx = vertexObj[0].cx;
+        startcy = vertexObj[0].cy - 60;
+        endcx = vertexObj[0].cx;
+        endcy = vertexObj[0].cy;
+        //画线
+        lineStr += '<line x1="'+startcx+'" y1="'+startcy+'" x2="'+endcx+
+                '" y2="'+endcy+'" style="stroke:#999;stroke-width:2" />';
+        //存储线的数据
+        var obj = {
+            "startcx":startcx,
+            "startcy":startcy,
+            "endcx":endcx,
+            "endcy":endcy
+        };
+        //获取三角形的三个角坐标和角度
+        var getTriangle = function(obj) {
+            startcx = obj.startcx;
+            startcy= obj.startcy;
+            endcx= obj.endcx;
+            endcy= obj.endcy;
+            var x = endcx, y = endcy+20;
+            //计算三角形三点坐标
+            var points = [x-7,y+15,x+7,y+15,x,y].join(",");
+            var angle = 0;
+            //根据线计算三角形的角度
+            angle =180*Math.acos((startcy-endcy)/Math.sqrt((endcx-startcx)*(endcx-startcx)+
+                                    (startcy-endcy)*(startcy-endcy)))/Math.PI;
+            if(endcx-startcx < 0){
+                angle = 360 - angle;
+            }
+            //存储三角形三角坐标及角度
+            var out = {
+                "points":points,
+                "angle":angle
+            };
+            return out;
+        };
+        var dd = getTriangle(obj); //传入线数据获取三角形三点坐标及角度
+        var angle = [dd.angle,endcx,endcy].join(","); //计算角度
+        //画三角形箭头
+        arrowStr += '<polygon points="'+dd.points+'" fill:"#171717" transform="rotate('+angle+')"/>';
+        var headdata = "head"; //标注是头指针
+        textStr += '<text x="'+30+'" y="'+30+'" fill="black">'+headdata+'</text>';//画线
+
+        //画尾指针
+        if(nodes.length != 0) {
+            startcx = vertexObj[nodes.length - 1].cx;
+            startcy = vertexObj[[nodes.length - 1]].cy + 60;
+            endcx = vertexObj[nodes.length - 1].cx;
+            endcy = vertexObj[nodes.length - 1].cy;
+            lineStr += '<line x1="'+startcx+'" y1="'+startcy+'" x2="'+endcx+
+                    '" y2="'+endcy+'" style="stroke:#999;stroke-width:2" />';
+            var obj = {
+                "startcx":startcx,
+                "startcy":startcy,
+                "endcx":endcx,
+                "endcy":endcy
+            };
+            var getTriangle = function(obj) {
+                startcx = obj.startcx;
+                startcy= obj.startcy;
+                endcx= obj.endcx;
+                endcy= obj.endcy;
+                var x = endcx, y = endcy+20;
+                var points = [x-7,y+15,x+7,y+15,x,y].join(",");//一个三角形三点的坐标
+                var angle = 0;
+                //注意这里的坐标系和通常情况下的坐标系y轴是相反的，因此 endcy-startcy 要变为startcy-endcy
+                angle =180*Math.acos((startcy-endcy)/Math.sqrt((endcx-startcx)*(endcx-startcx)+
+                                        (startcy-endcy)*(startcy-endcy)))/Math.PI;
+                if(endcx-startcx < 0){
+                    angle = 360 - angle;
+                }
+                var out = {
+                    "points":points,
+                    "angle":angle
+                };
+                return out;
+            };
+            var dd = getTriangle(obj);
+            var angle = [dd.angle,endcx,endcy].join(",");
+            //画三角形箭头
+            arrowStr += '<polygon points="'+dd.points+'" fill:"#171717" transform="rotate('+angle+')"/>';
+            var taildata = "tail";
+            var xx = 30 + (LkList.length - 1) * 85;
+            textStr += '<text x="'+xx+'" y="'+170+'" fill="black">'+taildata+'</text>';
+        }
+
+
+        svg.innerHTML = lineStr+circleStr+textStr+arrowStr; //将圆线文本添加到svg中
+    }
+</script>
+
+</body>
+</html>
